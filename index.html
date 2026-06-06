@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日程調整ツール - Chrono</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- ローディング画面 -->
+        <div id="loadingScreen" class="loading-screen hidden">
+            <div class="spinner"></div>
+            <p>読み込み中...</p>
+        </div>
+
+        <!-- メインコンテナ -->
+        <div id="mainContainer" class="container">
+            <!-- ヘッダー -->
+            <header class="header">
+                <div class="header-content">
+                    <h1 class="logo">📅 Chrono</h1>
+                    <p class="tagline">シンプルな日程調整ツール</p>
+                </div>
+                <button id="themeSwitchBtn" class="theme-switch-btn" title="ダークモード切り替え">
+                    🌙
+                </button>
+            </header>
+
+            <!-- メインページ -->
+            <main id="mainPage" class="page">
+                <div class="hero-section">
+                    <h2>新しいイベントを作成</h2>
+                    <p>複数の候補日から最適な日程を探し出しましょう</p>
+                </div>
+
+                <div class="form-card">
+                    <form id="createEventForm">
+                        <div class="form-group">
+                            <label for="eventTitle">イベント名 *</label>
+                            <input 
+                                type="text" 
+                                id="eventTitle" 
+                                name="eventTitle" 
+                                placeholder="例：チームミーティング" 
+                                required
+                                maxlength="100"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="eventDescription">説明</label>
+                            <textarea 
+                                id="eventDescription" 
+                                name="eventDescription" 
+                                placeholder="イベントの詳細説明..." 
+                                rows="4"
+                                maxlength="500"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>候補日時 *</label>
+                            <div id="datesContainer" class="dates-container">
+                                <div class="date-input-row">
+                                    <input 
+                                        type="datetime-local" 
+                                        class="date-input" 
+                                        placeholder="日時を選択"
+                                        required
+                                    >
+                                    <button type="button" class="remove-date-btn" style="display: none;">✕</button>
+                                </div>
+                            </div>
+                            <button type="button" id="addDateBtn" class="btn-secondary">+ 日程を追加</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deadline">回答締切 *</label>
+                            <input 
+                                type="datetime-local" 
+                                id="deadline" 
+                                name="deadline" 
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-large">
+                            イベントを作成
+                        </button>
+                    </form>
+                </div>
+            </main>
+
+            <!-- イベント作成完了ページ -->
+            <div id="createdPage" class="page hidden">
+                <div class="success-card">
+                    <div class="success-icon">✓</div>
+                    <h2>イベントを作成しました！</h2>
+                    
+                    <div class="url-section">
+                        <h3>参加者URL</h3>
+                        <div class="url-box">
+                            <input 
+                                type="text" 
+                                id="participantUrlInput" 
+                                readonly 
+                                class="url-input"
+                            >
+                            <button id="copyParticipantUrlBtn" class="btn-copy">コピー</button>
+                        </div>
+                        <button id="participantQRBtn" class="btn-secondary">QRコード表示</button>
+                    </div>
+
+                    <div class="url-section">
+                        <h3>管理者URL</h3>
+                        <div class="url-box">
+                            <input 
+                                type="text" 
+                                id="adminUrlInput" 
+                                readonly 
+                                class="url-input"
+                            >
+                            <button id="copyAdminUrlBtn" class="btn-copy">コピー</button>
+                        </div>
+                    </div>
+
+                    <!-- QRコードモーダル -->
+                    <div id="qrModal" class="modal hidden">
+                        <div class="modal-content">
+                            <button id="closeQRModal" class="modal-close">✕</button>
+                            <h3>参加者URLのQRコード</h3>
+                            <div id="qrCodeContainer" class="qr-container">
+                                <canvas id="qrCanvas"></canvas>
+                            </div>
+                            <button id="downloadQRBtn" class="btn-secondary">PNGで保存</button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="backToCreateBtn" class="btn-secondary">別のイベントを作成</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+    
+    <!-- QRコード生成ライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Firebase設定 -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- メインアプリケーション -->
+    <script src="app.js"></script>
+</body>
+</html>
