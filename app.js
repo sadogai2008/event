@@ -13,10 +13,33 @@ const state = {
 };
 
 // ==========================================
+// Firebase 初期化待機
+// ==========================================
+
+// Firebase が読み込まれるまで待機する
+let db = null;
+const waitForFirebase = setInterval(() => {
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+        db = firebase.firestore();
+        clearInterval(waitForFirebase);
+        console.log('Firebase initialized');
+        initApp();
+    }
+}, 100);
+
+// タイムアウト設定（10秒）
+setTimeout(() => {
+    if (!db) {
+        console.error('Firebase initialization timeout');
+        alert('Firebase の初期化に失敗しました。ページをリロードしてください。');
+    }
+}, 10000);
+
+// ==========================================
 // ページ初期化
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', async () => {
+function initApp() {
     // テーマ初期化
     initTheme();
     
@@ -30,12 +53,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.currentPage = 'participant';
         state.eventId = eventId;
         state.publicToken = token;
-        await initParticipantPage();
+        initParticipantPage();
     } else if (page === 'admin' && eventId && token) {
         state.currentPage = 'admin';
         state.eventId = eventId;
         state.adminToken = token;
-        await initAdminPage();
+        initAdminPage();
     } else {
         state.currentPage = 'create';
         initCreatePage();
@@ -43,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // イベントリスナー設定
     setupEventListeners();
-});
+}
 
 // ==========================================
 // テーマ切り替え
@@ -137,6 +160,11 @@ function addDateInput() {
 }
 
 async function handleCreateEvent() {
+    if (!db) {
+        alert('Firebase がまだ初期化されていません。少々お待ちください。');
+        return;
+    }
+
     const title = document.getElementById('eventTitle').value;
     const description = document.getElementById('eventDescription').value;
     const deadline = document.getElementById('deadline').value;
@@ -280,6 +308,11 @@ function downloadQRCode() {
 // ==========================================
 
 async function initParticipantPage() {
+    if (!db) {
+        showError('Firebase がまだ初期化されていません');
+        return;
+    }
+
     showLoading(true);
 
     try {
@@ -456,6 +489,11 @@ function setupParticipantForm() {
 // ==========================================
 
 async function initAdminPage() {
+    if (!db) {
+        showError('Firebase がまだ初期化されていません');
+        return;
+    }
+
     showLoading(true);
 
     try {
