@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者ページ - Chrono</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- ローディング画面 -->
+        <div id="loadingScreen" class="loading-screen hidden">
+            <div class="spinner"></div>
+            <p>読み込み中...</p>
+        </div>
+
+        <!-- メインコンテナ -->
+        <div id="mainContainer" class="container">
+            <!-- ヘッダー -->
+            <header class="header">
+                <div class="header-content">
+                    <h1 class="logo">📅 Chrono - 管理者</h1>
+                    <p class="tagline">イベント管理ページ</p>
+                </div>
+                <button id="themeSwitchBtn" class="theme-switch-btn" title="ダークモード切り替え">
+                    🌙
+                </button>
+            </header>
+
+            <!-- エラーメッセージ -->
+            <div id="errorMessage" class="error-message hidden"></div>
+
+            <!-- 管理者ページ -->
+            <main id="adminPage" class="page">
+                <div class="admin-header">
+                    <h2 id="eventTitle">イベント名</h2>
+                    <div class="admin-actions">
+                        <button id="editEventBtn" class="btn-secondary">編集</button>
+                        <button id="deleteEventBtn" class="btn-danger">削除</button>
+                    </div>
+                </div>
+
+                <!-- イベント詳細 -->
+                <div class="event-detail-card">
+                    <p id="eventDescription" class="event-description"></p>
+                    <div class="event-meta">
+                        <p><strong>回答締切:</strong> <span id="eventDeadline"></span></p>
+                        <p><strong>候補日時:</strong></p>
+                        <div id="eventDatesList" class="dates-list"></div>
+                    </div>
+                </div>
+
+                <!-- タブメニュー -->
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="responses-tab">回答一覧</button>
+                    <button class="tab-btn" data-tab="analytics-tab">集計結果</button>
+                    <button class="tab-btn" data-tab="search-tab">検索</button>
+                </div>
+
+                <!-- 回答一覧タブ -->
+                <div id="responses-tab" class="tab-content active">
+                    <div class="responses-controls">
+                        <button id="downloadCSVBtn" class="btn-secondary">CSVダウンロード</button>
+                    </div>
+                    
+                    <div id="responsesContainer" class="responses-container">
+                        <div class="empty-state">
+                            <p>まだ回答がありません</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 集計結果タブ -->
+                <div id="analytics-tab" class="tab-content hidden">
+                    <div id="analyticsContainer" class="analytics-container">
+                        <div class="empty-state">
+                            <p>回答データが不足しています</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 検索タブ -->
+                <div id="search-tab" class="tab-content hidden">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="参加者名で検索..."
+                            class="search-input"
+                        >
+                    </div>
+                    <div id="searchResults" class="search-results">
+                        <div class="empty-state">
+                            <p>参加者を検索してください</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- イベント編集モーダル -->
+            <div id="editEventModal" class="modal hidden">
+                <div class="modal-content">
+                    <button id="closeEditModal" class="modal-close">✕</button>
+                    <h3>イベント編集</h3>
+                    <form id="editEventForm">
+                        <div class="form-group">
+                            <label for="editTitle">イベント名</label>
+                            <input 
+                                type="text" 
+                                id="editTitle" 
+                                required
+                                maxlength="100"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editDescription">説明</label>
+                            <textarea 
+                                id="editDescription" 
+                                rows="4"
+                                maxlength="500"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editDeadline">回答締切</label>
+                            <input 
+                                type="datetime-local" 
+                                id="editDeadline" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label>候補日時</label>
+                            <div id="editDatesContainer" class="dates-container"></div>
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="submit" class="btn-primary">保存</button>
+                            <button type="button" id="cancelEditBtn" class="btn-secondary">キャンセル</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 回答編集モーダル -->
+            <div id="editResponseModal" class="modal hidden">
+                <div class="modal-content">
+                    <button id="closeResponseModal" class="modal-close">✕</button>
+                    <h3>回答編集</h3>
+                    <form id="editResponseForm">
+                        <div class="form-group">
+                            <label for="editResponseName">参加者名</label>
+                            <input 
+                                type="text" 
+                                id="editResponseName" 
+                                required
+                                maxlength="100"
+                            >
+                        </div>
+
+                        <div id="editResponseAnswersContainer" class="response-answers">
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="submit" class="btn-primary">保存</button>
+                            <button type="button" id="cancelResponseEditBtn" class="btn-secondary">キャンセル</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 削除確認モーダル -->
+            <div id="confirmDeleteModal" class="modal hidden">
+                <div class="modal-content modal-small">
+                    <h3>削除確認</h3>
+                    <p id="deleteMessage">このアイテムを削除してもよろしいですか？</p>
+                    <div class="modal-buttons">
+                        <button id="confirmDeleteBtn" class="btn-danger">削除</button>
+                        <button id="cancelDeleteBtn" class="btn-secondary">キャンセル</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+    
+    <!-- Firebase設定 -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- メインアプリケーション -->
+    <script src="app.js"></script>
+</body>
+</html>
